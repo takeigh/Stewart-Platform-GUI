@@ -44,10 +44,10 @@ namespace StewartPlatformGUI
 
 
 
-
 	public:
 
 		static bool running = false;
+		static double progressCalc = 0;
 
 	protected:
 		/// <summary>
@@ -62,8 +62,6 @@ namespace StewartPlatformGUI
 		}
 	private: System::Windows::Forms::MenuStrip^ menuStrip1;
 	private: System::Windows::Forms::ToolStripMenuItem^ menuOptionPositionTime;
-
-	protected:
 
 	private: System::Windows::Forms::ToolStripMenuItem^ menuOptionFrequencyAmplitude;
 
@@ -81,7 +79,6 @@ namespace StewartPlatformGUI
 		bool dataFileInput = true;
 		System::Threading::Thread^ reading;
 		System::Threading::Thread^ calculationThread;
-		System::Threading::Thread^ processingDialog;
 
 	private: System::Windows::Forms::Button^ buttonStart;
 	private: System::Windows::Forms::Button^ buttonStop;
@@ -504,7 +501,6 @@ namespace StewartPlatformGUI
 		durationBounds->Visible = !state;
 		labelAxis->Visible = !state;
 		checkedListBoxAxis->Visible = !state;
-
 	}
 
 	private: bool validFrequencyInputs(std::string frequency, std::string amplitude, std::string duration)
@@ -623,27 +619,16 @@ namespace StewartPlatformGUI
 			axis = "z";
 		}
 
-		// Make thread for dialog box that is open when calculating
+		std::cout << "Calculating positions. Please wait" << std::endl;
 
-		bool calculating = true;
-
-		processingDialog = gcnew System::Threading::Thread(gcnew System::Threading::ThreadStart(this, &StewartPlatform::processingBox));
-		processingDialog->Start();
+		MessageBox::Show("Calculating based on input parameters.\nYou may close this dialog box", "Calculating: Please Wait");
 
 		std::vector<std::vector<std::string>> data = calculator.calculate(freq, amp, dur, axis);
-
-		calculating = false;
 
 		if (running)
 		{
 			calculator.printData(data);
 		}
-	}
-
-	private: System::Void processingBox() 
-	{
-		MessageBox::Show("The system is calculating positions based on inputs", "Calculation Processing");
-
 	}
 };
 }

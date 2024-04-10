@@ -8,33 +8,34 @@
 
 std::vector<std::vector<std::string>> FrequencyCalculation::calculate(double f, double a, double d, std::string axis)
 {
-	frequency = f;
-	amplitude = a;
-	duration = d;
-	axis = axis;
+	this->frequency = f;
+	this->amplitude = a;
+	this->duration = d;
+	this->axis = axis;
 
 	double position;
 	std::vector<std::string> line;
 
-	int partitions = f*200;
+	int partitions = frequency*200;
 	double step = 1.0 / static_cast<double>(partitions);
 
 	std::vector<std::string> line1;
 	line1.push_back("X,Y,Z,XR,YR,ZR,Time");
 	positionData.push_back(line1);
 
-	for (int i = 0; i * step < d; i++) {
+	for (int i = 0; i * step < duration; i++) {
+
 		if (!StewartPlatformGUI::StewartPlatform::running) {
 			std::cout << "Cancelled Operation" << std::endl;
 
 			break;
 		}
 
-		position = a * sin(f*2* M_PI * step * i);
+		position = amplitude * sin(frequency * 2 * M_PI * step * i);
 
 		line.clear();
 
-		if (axis == "x")
+		if (this->axis == "x")
 		{
 			line.push_back(std::to_string(position));
 			for (int j = 0; j < 5; j++)
@@ -50,7 +51,7 @@ std::vector<std::vector<std::string>> FrequencyCalculation::calculate(double f, 
 			}
 
 		}
-		else if (axis == "y")
+		else if (this->axis == "y")
 		{
 			line.push_back("0");
 
@@ -67,7 +68,7 @@ std::vector<std::vector<std::string>> FrequencyCalculation::calculate(double f, 
 				}
 			}
 		}
-		else if (axis == "z")
+		else if (this->axis == "z")
 		{
 			for (int j = 0; j < 2; j++)
 			{

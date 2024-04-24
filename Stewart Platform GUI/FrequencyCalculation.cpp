@@ -16,14 +16,18 @@ std::vector<std::vector<std::string>> FrequencyCalculation::calculate(double f, 
 	double position;
 	std::vector<std::string> line;
 
-	int partitions = frequency*200;
-	double step = 1.0 / static_cast<double>(partitions);
+	double period = 1.0 / frequency;
+	double steps = 40;
+	double stepInterval = period / steps;
+
+	std::vector<std::vector<std::string>> periodGroup;
 
 	std::vector<std::string> line1;
 	line1.push_back("X,Y,Z,XR,YR,ZR,Time");
 	positionData.push_back(line1);
 
-	for (int i = 0; i * step < duration; i++) {
+	for (int i = 0; i < steps; i++) {
+		line.clear();
 
 		if (!StewartPlatformGUI::StewartPlatform::running) {
 			std::cout << "Cancelled Operation" << std::endl;
@@ -31,13 +35,12 @@ std::vector<std::vector<std::string>> FrequencyCalculation::calculate(double f, 
 			break;
 		}
 
-		position = amplitude * sin(frequency * 2 * M_PI * step * i);
-
-		line.clear();
+		position = amplitude * sin(frequency * 2 * M_PI * i * stepInterval);
 
 		if (this->axis == "x")
 		{
 			line.push_back(std::to_string(position));
+
 			for (int j = 0; j < 5; j++)
 			{
 				if (j == 1)
@@ -83,9 +86,13 @@ std::vector<std::vector<std::string>> FrequencyCalculation::calculate(double f, 
 			}
 		}
 
-		line.push_back(std::to_string(step * 1000));
+		line.push_back(std::to_string(stepInterval));
 
-		positionData.push_back(line);
+		periodGroup.push_back(line);
+	}
+
+	for (int i = 0; i < duration; i++) {
+		positionData.insert(positionData.end(), periodGroup.begin(), periodGroup.end());
 	}
 
 	return positionData;
@@ -109,6 +116,6 @@ void FrequencyCalculation::printData(std::vector<std::vector<std::string>> data)
 
 		double time = std::stod(row[row.size() - 1]);
 
-		Sleep(time);
+		Sleep(time * 1000);
 	}
 }

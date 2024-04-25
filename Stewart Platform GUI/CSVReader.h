@@ -1,20 +1,24 @@
 #pragma once
-#include <fstream>
 #include <vector>
 #include <string>
-#include <algorithm>
+#include "ActuatorLengths.h"
 
-class CSVReader {
-private:
+class CSVReader 
+{
+public:
 	std::string fileName;
 	std::string delimeter;
 
 	std::vector<std::vector<std::string>> dataList; //Rows<columns<string data>>
+	int dataLines;
 
-	std::vector<std::vector<std::string>> transcribe(std::string fileName);
+	CSVReader(std::string fileName, std::string delimeter);
+	
+	int GetDataSize();
 
-	std::vector<std::string> splitLine(std::string& str);
+	std::vector<std::vector<std::string>> Transcribe(std::string fileName);
 
-public:
-	CSVReader(std::string fileName, std::string dellimeter);
+	ActuatorLengths ParseRow(int row);
+
+	std::vector<std::string> SplitLine(std::string& str);
 };

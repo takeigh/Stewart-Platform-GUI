@@ -1,94 +1,74 @@
 #include "FrequencyCalculation.h"
-#include "iostream"
+#include <msclr/marshal_cppstd.h>
 #include <windows.h>
+#include "StewartPlatform.h"
+#include "iostream"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include "StewartPlatform.h"
 
-std::vector<std::vector<std::string>> FrequencyCalculation::calculate(double f, double a, double d, std::string axis)
+using namespace System;
+using namespace System::IO::Ports;
+using namespace msclr::interop;
+
+const double angle = 78 * M_PI / 180;
+
+std::vector<std::string> FrequencyCalculation::calculate(double f, double a, double d)
 {
 	this->frequency = f;
 	this->amplitude = a;
 	this->duration = d;
-	this->axis = axis;
 
 	double position;
-	std::vector<std::string> line;
+	double prevPosition = 2000;
+	double actuatorLength;
+	std::string line;
 
 	double period = 1.0 / frequency;
 	double steps = 40;
 	double stepInterval = period / steps;
 
-	std::vector<std::vector<std::string>> periodGroup;
-
-	std::vector<std::string> line1;
-	line1.push_back("X,Y,Z,XR,YR,ZR,Time");
-	positionData.push_back(line1);
+	std::vector<std::string> periodGroup;
 
 	for (int i = 0; i < steps; i++) {
-		line.clear();
-
 		if (!StewartPlatformGUI::StewartPlatform::running) {
 			std::cout << "Cancelled Operation" << std::endl;
 
 			break;
 		}
 
-		position = amplitude * sin(frequency * 2 * M_PI * i * stepInterval);
+		// Times 10 for millimeters
+		position = 10 * amplitude * sin(frequency * 2 * M_PI * i * stepInterval);
 
-		if (this->axis == "x")
-		{
-			line.push_back(std::to_string(position));
+		// Make the GCode in the form of "G0 X0 Y0 Z0 U0 V0 W0 F0"
 
-			for (int j = 0; j < 5; j++)
-			{
-				if (j == 1)
-				{
-					line.push_back("200");
-				}
-				else
-				{
-					line.push_back("0");
-				}
-			}
+		// Oscillate around 2000 mm (200 cm)
+		position += 2000;
 
-		}
-		else if (this->axis == "y")
-		{
-			line.push_back("0");
+		// Acutator is slightly angled
+		// Calculate actuator length for desired height
+		double theta = sin(angle);
+		actuatorLength = position / theta;
+		int wholeNum = std::round(actuatorLength);
+		std::string len = std::to_string(wholeNum);
 
-			line.push_back(std::to_string(position));
+		// Make GCode with just actuator lengths
+		line = "G0 X" + len + " Y" + len + " Z" + len + " U" + len + " V" + len + " W" + len;
 
-			for (int j = 0; j < 4; j++)
-			{
-				if (j == 0) {
-					line.push_back("200");
-				}
-				else
-				{
-					line.push_back("0");
-				}
-			}
-		}
-		else if (this->axis == "z")
-		{
-			for (int j = 0; j < 2; j++)
-			{
-				line.push_back("0");
-			}
+		// Feed rate is calculated as velocity
+		double velocity = (position - prevPosition) / stepInterval;
 
-			line.push_back(std::to_string(200.0 + position));
+		// Read everything as positive whole values
+		int feedrate = std::abs(std::round(velocity));
 
-			for (int j = 0; j < 3; j++)
-			{
-				line.push_back("0");
-			}
-		}
+		// Attach feedrate to to GCode command
+		line = line + " F" + std::to_string(feedrate);
 
-		line.push_back(std::to_string(stepInterval));
-
+		// Add to list of commands
 		periodGroup.push_back(line);
+
+		// Set up for next loop
+		prevPosition = position;
 	}
 
 	for (int i = 0; i < duration; i++) {
@@ -98,24 +78,52 @@ std::vector<std::vector<std::string>> FrequencyCalculation::calculate(double f, 
 	return positionData;
 }
 
-void FrequencyCalculation::printData(std::vector<std::vector<std::string>> data) {
-	data.erase(data.begin());
-	
-	for each (std::vector<std::string> row in data)
+void FrequencyCalculation::sendData(std::vector<std::string> data) {
+	SerialPort^ serialPort = gcnew SerialPort("COM3", 115200);
+	for each (std::string row in data)
 	{
 		if (!StewartPlatformGUI::StewartPlatform::running) {
 			std::cout << "Cancelled Operation" << std::endl;
 			break;
 		}
 
-		for each (std::string part in row)
-		{
-			std::cout << part << " ";
-		}
-		std::cout << std::endl;
+		// Make a String^ out of std::string for the serial
+		System::String^ gcode = gcnew String(msclr::interop::marshal_as<System::String^>(row));
 
-		double time = std::stod(row[row.size() - 1]);
+		std::cout << row << std::endl;
 
-		Sleep(time * 1000);
+		// Serial output
+		// serialPort->Write(gcode);
 	}
+	
+	try {
+		serialPort->Open();
+
+		for each (std::string row in data)
+		{
+			if (!StewartPlatformGUI::StewartPlatform::running) {
+				std::cout << "Cancelled Operation" << std::endl;
+				break;
+			}
+
+			// Make a String^ out of std::string for the serial
+			System::String^ gcode = gcnew String(msclr::interop::marshal_as<System::String^>(row));
+
+			std::cout << row << std::endl;
+
+			// Serial output
+			// serialPort->Write(gcode);
+		}
+
+	}
+	catch (System::UnauthorizedAccessException^ ex)
+	{
+		std::cout << "Error: Access to the port is denied."")" << std::endl;
+	}
+	catch (System::IO::IOException^ ex)
+	{
+		std::cout << "Error: Serial port could not be opened." << std::endl; 
+	}
+
+	serialPort->Close();
 }

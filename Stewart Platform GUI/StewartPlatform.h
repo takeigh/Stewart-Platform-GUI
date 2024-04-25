@@ -5,8 +5,6 @@
 #include <msclr/marshal_cppstd.h>
 #include "FrequencyCalculation.h"
 
-
-
 namespace StewartPlatformGUI
 {
 
@@ -35,9 +33,9 @@ namespace StewartPlatformGUI
 	private: System::Windows::Forms::TextBox^ textBoxAmplitude;
 	private: System::Windows::Forms::Label^ labelDuration;
 	private: System::Windows::Forms::TextBox^ textBoxDuration;
-	private: System::Windows::Forms::CheckedListBox^ checkedListBoxAxis;
 
-	private: System::Windows::Forms::Label^ labelAxis;
+
+
 	private: System::Windows::Forms::Label^ frequencyBounds;
 	private: System::Windows::Forms::Label^ amplitudeBounds;
 	private: System::Windows::Forms::Label^ durationBounds;
@@ -74,7 +72,6 @@ namespace StewartPlatformGUI
 		double freq;
 		double amp;
 		double dur;
-		System::String^ ax;
 		System::String^ filePath;
 		bool dataFileInput = true;
 		System::Threading::Thread^ reading;
@@ -110,8 +107,6 @@ namespace StewartPlatformGUI
 			   this->textBoxAmplitude = (gcnew System::Windows::Forms::TextBox());
 			   this->labelDuration = (gcnew System::Windows::Forms::Label());
 			   this->textBoxDuration = (gcnew System::Windows::Forms::TextBox());
-			   this->checkedListBoxAxis = (gcnew System::Windows::Forms::CheckedListBox());
-			   this->labelAxis = (gcnew System::Windows::Forms::Label());
 			   this->frequencyBounds = (gcnew System::Windows::Forms::Label());
 			   this->amplitudeBounds = (gcnew System::Windows::Forms::Label());
 			   this->durationBounds = (gcnew System::Windows::Forms::Label());
@@ -201,7 +196,7 @@ namespace StewartPlatformGUI
 			   this->buttonStop->Name = L"buttonStop";
 			   this->buttonStop->Size = System::Drawing::Size(200, 100);
 			   this->buttonStop->TabIndex = 5;
-			   this->buttonStop->Text = L"Force Stop";
+			   this->buttonStop->Text = L"Stop";
 			   this->buttonStop->UseVisualStyleBackColor = false;
 			   this->buttonStop->Click += gcnew System::EventHandler(this, &StewartPlatform::buttonStop_Click);
 			   // 
@@ -268,31 +263,6 @@ namespace StewartPlatformGUI
 			   this->textBoxDuration->TabIndex = 11;
 			   this->textBoxDuration->Visible = false;
 			   // 
-			   // checkedListBoxAxis
-			   // 
-			   this->checkedListBoxAxis->CheckOnClick = true;
-			   this->checkedListBoxAxis->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12));
-			   this->checkedListBoxAxis->FormattingEnabled = true;
-			   this->checkedListBoxAxis->Items->AddRange(gcnew cli::array< System::Object^  >(3) { L"X-Axis", L"Y-Axis", L"Z-Axis" });
-			   this->checkedListBoxAxis->Location = System::Drawing::Point(310, 310);
-			   this->checkedListBoxAxis->Name = L"checkedListBoxAxis";
-			   this->checkedListBoxAxis->RightToLeft = System::Windows::Forms::RightToLeft::No;
-			   this->checkedListBoxAxis->Size = System::Drawing::Size(80, 67);
-			   this->checkedListBoxAxis->TabIndex = 12;
-			   this->checkedListBoxAxis->Visible = false;
-			   this->checkedListBoxAxis->SelectedIndexChanged += gcnew System::EventHandler(this, &StewartPlatform::checkedListBoxAxis_SelectedIndexChanged);
-			   // 
-			   // labelAxis
-			   // 
-			   this->labelAxis->AutoSize = true;
-			   this->labelAxis->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12));
-			   this->labelAxis->Location = System::Drawing::Point(137, 310);
-			   this->labelAxis->Name = L"labelAxis";
-			   this->labelAxis->Size = System::Drawing::Size(134, 20);
-			   this->labelAxis->TabIndex = 13;
-			   this->labelAxis->Text = L"Axis of Movement";
-			   this->labelAxis->Visible = false;
-			   // 
 			   // frequencyBounds
 			   // 
 			   this->frequencyBounds->AutoSize = true;
@@ -301,7 +271,7 @@ namespace StewartPlatformGUI
 			   this->frequencyBounds->Name = L"frequencyBounds";
 			   this->frequencyBounds->Size = System::Drawing::Size(77, 20);
 			   this->frequencyBounds->TabIndex = 14;
-			   this->frequencyBounds->Text = L"(0 to 100)";
+			   this->frequencyBounds->Text = L"(1 to 100)";
 			   this->frequencyBounds->Visible = false;
 			   // 
 			   // amplitudeBounds
@@ -312,7 +282,7 @@ namespace StewartPlatformGUI
 			   this->amplitudeBounds->Name = L"amplitudeBounds";
 			   this->amplitudeBounds->Size = System::Drawing::Size(68, 20);
 			   this->amplitudeBounds->TabIndex = 15;
-			   this->amplitudeBounds->Text = L"(0 to 10)";
+			   this->amplitudeBounds->Text = L"(1 to 10)";
 			   this->amplitudeBounds->Visible = false;
 			   // 
 			   // durationBounds
@@ -323,7 +293,7 @@ namespace StewartPlatformGUI
 			   this->durationBounds->Name = L"durationBounds";
 			   this->durationBounds->Size = System::Drawing::Size(77, 20);
 			   this->durationBounds->TabIndex = 16;
-			   this->durationBounds->Text = L"(0 to 180)";
+			   this->durationBounds->Text = L"(1 to 180)";
 			   this->durationBounds->Visible = false;
 			   // 
 			   // StewartPlatform
@@ -335,8 +305,6 @@ namespace StewartPlatformGUI
 			   this->Controls->Add(this->durationBounds);
 			   this->Controls->Add(this->amplitudeBounds);
 			   this->Controls->Add(this->frequencyBounds);
-			   this->Controls->Add(this->labelAxis);
-			   this->Controls->Add(this->checkedListBoxAxis);
 			   this->Controls->Add(this->textBoxDuration);
 			   this->Controls->Add(this->labelDuration);
 			   this->Controls->Add(this->textBoxAmplitude);
@@ -404,7 +372,7 @@ namespace StewartPlatformGUI
 
 	private: System::Void buttonStart_Click(System::Object^ sender, System::EventArgs^ e)
 	{
-		if (dataFileInput)
+		if (dataFileInput && running == false)
 		{
 			if (filePath != nullptr)
 			{
@@ -418,7 +386,7 @@ namespace StewartPlatformGUI
 				MessageBox::Show("Please Select a File First", "Error: No File Found");
 			}
 		}
-		else
+		else if (running == false)
 		{
 			std::string frequency = marshal_as<std::string>(textBoxFrequency->Text);
 			std::string amplitude = marshal_as<std::string>(textBoxAmplitude->Text);
@@ -430,47 +398,15 @@ namespace StewartPlatformGUI
 				double a = std::stod(amplitude);
 				double d = std::stod(duration);
 
-				std::string axis = "0";
-				std::string temp;
-				System::String^ itemText;
+				// THREAD START
+				freq = f;
+				amp = a;
+				dur = d;
 
-				for (int i = 0; i < checkedListBoxAxis->Items->Count; i++) {
-					if (checkedListBoxAxis->GetItemChecked(i)) {
-						itemText = checkedListBoxAxis->Items[i]->ToString();
-						temp = marshal_as<std::string>(itemText);
-					}
-				}
+				calculationThread = gcnew System::Threading::Thread(gcnew System::Threading::ThreadStart(this, &StewartPlatform::calculationProcess));
+				calculationThread->Start();
 
-				if (temp == "X-Axis")
-				{
-					axis = "x";
-				}
-				else if (temp == "Y-Axis")
-				{
-					axis = "y";
-				}
-				else if (temp == "Z-Axis")
-				{
-					axis = "z";
-				}
-
-				if (axis != "0")
-				{
-					// THREAD START
-					freq = f;
-					amp = a;
-					dur = d;
-					ax = itemText;
-
-					calculationThread = gcnew System::Threading::Thread(gcnew System::Threading::ThreadStart(this, &StewartPlatform::calculationProcess));
-					calculationThread->Start();
-
-					running = true;
-				}
-				else
-				{
-					MessageBox::Show("No axis selected.", "Error: Invalid Axis");
-				}
+				running = true;
 			}
 		}
 	}
@@ -479,8 +415,8 @@ namespace StewartPlatformGUI
 	{
 		auto temp = this->filePath;
 		std::string stringFilePath = marshal_as<std::string>(temp);
-
-		CSVReader reader(stringFilePath, ",");
+			
+		//platform->ReadFile(stringFilePath, ",");
 	}
 
 	private: System::Void menuOptionPositionTime_Click(System::Object^ sender, System::EventArgs^ e)
@@ -514,8 +450,6 @@ namespace StewartPlatformGUI
 		labelDuration->Visible = !state;
 		textBoxDuration->Visible = !state;
 		durationBounds->Visible = !state;
-		labelAxis->Visible = !state;
-		checkedListBoxAxis->Visible = !state;
 
 		if (state) {
 			this->menuOptionPositionTime->BackColor = System::Drawing::SystemColors::Highlight;
@@ -557,10 +491,10 @@ namespace StewartPlatformGUI
 				return false;
 			}
 
-			if (f > 0 && f <= 100)
+			if (f >= 1 && f <= 100)
 			{
-				if (a > 0 && a <= 10) {
-					if (d > 0 && d <= 180)
+				if (a >= 1 && a <= 10) {
+					if (d >= 1 && d <= 180)
 					{
 						return true;
 					}
@@ -568,7 +502,7 @@ namespace StewartPlatformGUI
 					{
 						if (d <= 0)
 						{
-							MessageBox::Show("Duration must be greater than 0.", "Error: Duration too Short");
+							MessageBox::Show("Duration must be greater than or equal to 1.", "Error: Duration too Short");
 						}
 						else
 						{
@@ -580,7 +514,7 @@ namespace StewartPlatformGUI
 				{
 					if (a <= 0)
 					{
-						MessageBox::Show("Amplitude must be greater than 0.", "Error: Amplitude too Small");
+						MessageBox::Show("Amplitude must be greater than or equal to 1.", "Error: Amplitude too Small");
 					}
 					else
 					{
@@ -592,7 +526,7 @@ namespace StewartPlatformGUI
 			{
 				if (f <= 0)
 				{
-					MessageBox::Show("Frequency must be greater than 0.", "Error: Frequency too Small");
+					MessageBox::Show("Frequency must be greater than or equal to 1.", "Error: Frequency too Small");
 				}
 				else
 				{
@@ -610,46 +544,17 @@ namespace StewartPlatformGUI
 		return false;
 	}
 
-	private: System::Void checkedListBoxAxis_SelectedIndexChanged(System::Object^ sender, System::EventArgs^ e)
-	{
-		for (int i = 0; i < checkedListBoxAxis->Items->Count; i++)
-		{
-			if (i != checkedListBoxAxis->SelectedIndex)
-			{
-				checkedListBoxAxis->SetItemChecked(i, false);
-			}
-		}
-	}
-
-	private: System::Void calculationProcess()
+	System::Void calculationProcess()
 	{
 		FrequencyCalculation calculator;
 
-		auto temp = this->ax;
-		std::string temp2 = marshal_as<std::string>(temp);
-
-		std::string axis;
-
-		if (temp2 == "X-Axis")
-		{
-			axis = "x";
-		}
-		else if (temp2 == "Y-Axis")
-		{
-			axis = "y";
-		}
-		else if (temp2 == "Z-Axis")
-		{
-			axis = "z";
-		}
-
 		std::cout << "Calculating positions. Please wait" << std::endl;
 
-		std::vector<std::vector<std::string>> data = calculator.calculate(freq, amp, dur, axis);
+		std::vector<std::string> data = calculator.calculate(freq, amp, dur);
 
 		if (running)
 		{
-			calculator.printData(data);
+			calculator.sendData(data);
 		}
 
 		running = false;

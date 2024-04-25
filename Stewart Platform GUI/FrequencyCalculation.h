@@ -8,13 +8,13 @@ private:
 	double frequency;
 	double amplitude;
 	double duration;
-	std::string axis;
+	double angle;
 
-	std::vector<std::vector<std::string>> positionData;
+	std::vector<std::string> positionData;
 
 public:
-	std::vector<std::vector<std::string>> calculate(double f, double a, double d, std::string axis);
+	std::vector<std::string> calculate(double f, double a, double d);
 
-	void printData(std::vector<std::vector<std::string>> data);
+	void sendData(std::vector<std::string> data);
 };
 

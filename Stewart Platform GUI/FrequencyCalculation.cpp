@@ -4,14 +4,9 @@
 #include "StewartPlatform.h"
 #include "iostream"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 using namespace System;
 using namespace System::IO::Ports;
 using namespace msclr::interop;
-
-const double angle = 78 * M_PI / 180;
 
 std::vector<std::string> FrequencyCalculation::calculate(double f, double a, double d)
 {
@@ -80,21 +75,6 @@ std::vector<std::string> FrequencyCalculation::calculate(double f, double a, dou
 
 void FrequencyCalculation::sendData(std::vector<std::string> data) {
 	SerialPort^ serialPort = gcnew SerialPort("COM3", 115200);
-	for each (std::string row in data)
-	{
-		if (!StewartPlatformGUI::StewartPlatform::running) {
-			std::cout << "Cancelled Operation" << std::endl;
-			break;
-		}
-
-		// Make a String^ out of std::string for the serial
-		System::String^ gcode = gcnew String(msclr::interop::marshal_as<System::String^>(row));
-
-		std::cout << row << std::endl;
-
-		// Serial output
-		// serialPort->Write(gcode);
-	}
 	
 	try {
 		serialPort->Open();
@@ -112,7 +92,7 @@ void FrequencyCalculation::sendData(std::vector<std::string> data) {
 			std::cout << row << std::endl;
 
 			// Serial output
-			// serialPort->Write(gcode);
+			serialPort->Write(gcode);
 		}
 
 	}

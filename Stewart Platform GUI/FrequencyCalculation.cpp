@@ -14,30 +14,23 @@ std::vector<std::string> FrequencyCalculation::calculate(double f, double a, dou
 	this->amplitude = a;
 	this->duration = d;
 
-	double actuatorLength;
-
 	double period = 1.0 / frequency;
 	double stepInterval = period / 2;
 
 	std::vector<std::string> periodGroup;
 
-	/*
-	std::vector<std::string> zero = {
-		"G0 X0 Y0 Z0 U0 V0 W0 F100\n"
-	};
-	sendData(zero);
-	*/
+	PlatformWrapper^ platform = gcnew PlatformWrapper();
+	double centralLength = platform->GetLengths(200.0);
 
 	// Center point for vertical oscillations
-	int center = std::round(200.0 / sin(angle));
-	std::string centerString = std::to_string(center);
+	std::string centerString = std::to_string(centralLength);
 	std::string initialization = "G0 X" + centerString + " Y" + centerString + " Z" + centerString + " U" + centerString + " V" + centerString + " W" + centerString + " F100\n";
 	std::cout << initialization << std::endl;
+
+	positionData.push_back(initialization);
 	
 	// Reset to 5 rather than 0 so drivers don't error out
 	std::string reset = "G0 X5 Y5 Z5 U5 V5 W5 F100\n";
-
-	positionData.push_back(initialization);
 
 	// Find max and min of oscillation (10 * because feedrate is in mm not cm) (+ 200 to oscillate around 20cm)
 	double maxPosition = amplitude * sin(frequency * 2 * M_PI * (stepInterval/2)) + 200;
@@ -45,26 +38,23 @@ std::vector<std::string> FrequencyCalculation::calculate(double f, double a, dou
 
 	// Acutator is slightly angled
 	// Calculate actuator length for desired height
-	double theta = sin(angle);
-	actuatorLength = maxPosition / theta;
-	int wholeNum = std::round(actuatorLength);
-	std::string len = std::to_string(wholeNum);
+	double maxActuatorLength = platform->GetLengths(maxPosition);
+	std::string len = std::to_string(maxActuatorLength);
 
 	// Make GCode with max lengths
 	std::string maxLine = "G0 X" + len + " Y" + len + " Z" + len + " U" + len + " V" + len + " W" + len;
 
-	actuatorLength = minPosition / theta;
-	wholeNum = std::round(actuatorLength);
-	len = std::to_string(wholeNum);
+	double minActuatorLength = platform->GetLengths(minPosition);
+	len = std::to_string(minActuatorLength);
 
 	// GCode min lengths
 	std::string minLine = "G0 X" + len + " Y" + len + " Z" + len + " U" + len + " V" + len + " W" + len;
 	
 	// Feed rate is calculated as velocity
-	double velocity = (maxPosition - minPosition) / stepInterval;
+	double velocity = (maxActuatorLength - minActuatorLength) * 2 / stepInterval;
 
 	// Read everything as positive whole values
-	int feedrate = std::abs(std::round(velocity));
+	double feedrate = std::abs(velocity);
 
 	// Attach feedrate to to GCode command with newline character
 	maxLine = maxLine + " F" + std::to_string(feedrate) + "\n";
@@ -77,10 +67,13 @@ std::vector<std::string> FrequencyCalculation::calculate(double f, double a, dou
 	periodGroup.push_back(maxLine);
 	periodGroup.push_back(minLine);
 
-	for (int i = 0; i < duration; i++) {
+	for (int i = 0; i < (duration * frequency); i++) {
 		positionData.insert(positionData.end(), periodGroup.begin(), periodGroup.end());
 	}
-
+	
+	std::string finalPosition = "G0 X" + centerString + " Y" + centerString + " Z" + centerString + " U" + centerString + " V" + centerString + " W" + centerString + " F" + std::to_string(feedrate) + "\n";
+	positionData.push_back(finalPosition);
+	
 	positionData.push_back(reset);
 
 	return positionData;
@@ -125,11 +118,6 @@ void FrequencyCalculation::sendData(std::vector<std::string> data) {
 				// Loop through commands
 				for each (std::string row in data)
 				{
-					if (!StewartPlatformGUI::StewartPlatform::running) {
-						std::cout << "Cancelled Operation" << std::endl;
-						break;
-					}
-
 					std::cout << "Sending: " << row;
 
 					DWORD bytesWritten;

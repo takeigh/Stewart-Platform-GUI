@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vector3D.h"
+#include <string>
 
 struct ActuatorLengths {
 	double U = 0.0;
@@ -34,5 +35,16 @@ struct ActuatorLengths {
 		std::string c = constraintSuccess ? "true" : "false";
 
 		return "[" + x + ", " + y + ", " + z + ", " + u + ", " + v + ", " + w + ", " + c + "]";
+	}
+
+	std::string GCode() {
+		std::string u = std::to_string(U);
+		std::string v = std::to_string(V);
+		std::string w = std::to_string(W);
+		std::string x = std::to_string(X);
+		std::string y = std::to_string(Y);
+		std::string z = std::to_string(Z);
+
+		return "G0 X" + x + " Y" + y + " Z" + z + " U" + u + " V" + v + " W" + w;
 	}
 };

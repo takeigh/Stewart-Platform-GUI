@@ -14,6 +14,8 @@
 class Platform
 {
 public:
+	const std::string port = "COM3";
+
 	const double basePlateRadius = 546.1;//base center point to center of actuator mounting bracket
 	const double baseMountingAngle = 10.613;//arc angle between actuator mounting brackets from center of platform
 	const double platformPlateRadius = 636.1;//platform center point to center of actuator mounting bracket 546.1
@@ -21,16 +23,12 @@ public:
 	const double baseHeight = 850.9;//platform height from ground when at 0,0,0 -> 850.9
 	const double maximumLength = 460.0;//Maximum actuator stroke actual is 475. 460 is for safety
 	double baseActuatorLength;
-	int32_t desiredMoveTime;
 
-	static double xPos;
-	static double yPos;
-	static double zPos;
-	static double uPos;
-	static double vPos;
-	static double wPos;
+	ActuatorLengths aLPrev;
+	ActuatorLengths aLNew;
 
-	ActuatorLengths aL;
+	double desiredFeedRate;
+
 	Vector3D B1, B2, B3, B4, B5, B6;
 	Vector3D P1, P2, P3, P4, P5, P6;
 	Vector3D L1, L2, L3, L4, L5, L6;
@@ -41,11 +39,11 @@ public:
 
 	bool FollowPath(std::string filename, std::string delimeter);
 
-	void SetMoveTimeMs(int32_t ms);
+	void SetFeedRate(double ms);
 
 	ActuatorLengths GetPosition();
 
-	void Move();
+	void Move(std::string gcode);
 
 	ActuatorLengths CalculateIK(Vector3D XYZ);
 

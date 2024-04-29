@@ -12,7 +12,7 @@ CSVReader::CSVReader(std::string fileName, std::string delimeter)
 }
 
 int CSVReader::GetDataSize() {
-	return dataLines;
+	return dataList.size();
 }
 
 std::vector<std::vector<std::string>> CSVReader::Transcribe(std::string fileName)
@@ -49,46 +49,18 @@ std::vector<std::vector<std::string>> CSVReader::Transcribe(std::string fileName
 }
 
 ActuatorLengths CSVReader::ParseRow(int row) {
-	int rowCount = 0;
-	int columnCount = 0;
 	ActuatorLengths actuator;
 
 	// Get current row
 	std::vector<std::string>& currentLine = this->dataList[row];
 
 	// Take data from current row
-	for (std::string data : currentLine) {
-		if (rowCount == row) {
-			if (std::isdigit(data[0]) || data[0] == '-') {
-				switch (columnCount) {
-				case 0:
-					//std::cout << data;
-					actuator.X = std::stod(data);
-					break;
-				case 1:
-					actuator.Y = std::stod(data);
-					break;
-				case 2:
-					actuator.Z = std::stod(data);
-					break;
-				case 3:
-					actuator.U = std::stod(data);
-					break;
-				case 4:
-					actuator.V = std::stod(data);
-					break;
-				case 5:
-					actuator.W = std::stod(data);
-					break;
-				case 6:
-					actuator.timeStep = std::stod(data);
-					break;
-				default:
-					break;
-				}
-			}
-		}
-	}
+	actuator.X = std::stod(currentLine[0]);
+	actuator.Y = std::stod(currentLine[1]);
+	actuator.Z = std::stod(currentLine[2]);
+	actuator.U = std::stod(currentLine[3]);
+	actuator.V = std::stod(currentLine[4]);
+	actuator.W = std::stod(currentLine[5]);
 
 	return actuator;
 }

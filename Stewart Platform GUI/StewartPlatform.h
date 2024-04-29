@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <msclr/marshal_cppstd.h>
 #include "FrequencyCalculation.h"
+#include "PlatformWrapper.h"
 
 namespace StewartPlatformGUI
 {
@@ -215,11 +216,11 @@ namespace StewartPlatformGUI
 			   // 
 			   this->labelAmplitude->AutoSize = true;
 			   this->labelAmplitude->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 12));
-			   this->labelAmplitude->Location = System::Drawing::Point(156, 180);
+			   this->labelAmplitude->Location = System::Drawing::Point(151, 180);
 			   this->labelAmplitude->Name = L"labelAmplitude";
-			   this->labelAmplitude->Size = System::Drawing::Size(115, 20);
+			   this->labelAmplitude->Size = System::Drawing::Size(120, 20);
 			   this->labelAmplitude->TabIndex = 7;
-			   this->labelAmplitude->Text = L"Amplitude (cm)";
+			   this->labelAmplitude->Text = L"Amplitude (mm)";
 			   this->labelAmplitude->Visible = false;
 			   // 
 			   // textBoxFrequency
@@ -415,8 +416,9 @@ namespace StewartPlatformGUI
 	{
 		auto temp = this->filePath;
 		std::string stringFilePath = marshal_as<std::string>(temp);
-			
-		//platform->ReadFile(stringFilePath, ",");
+		
+		PlatformWrapper ^platform = gcnew PlatformWrapper();
+		platform->RunFile(stringFilePath, ",");
 	}
 
 	private: System::Void menuOptionPositionTime_Click(System::Object^ sender, System::EventArgs^ e)

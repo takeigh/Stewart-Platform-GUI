@@ -128,6 +128,7 @@
     <ClCompile Include="FrequencyCalculation.cpp" />
     <ClCompile Include="Mathematics.cpp" />
     <ClCompile Include="Platform.cpp" />
+    <ClCompile Include="PlatformWrapper.cpp" />
     <ClCompile Include="Quaternion.cpp" />
     <ClCompile Include="Rotation.cpp" />
     <ClCompile Include="RotationMatrix.cpp" />
@@ -146,6 +147,7 @@
     <ClInclude Include="FrequencyCalculation.h" />
     <ClInclude Include="Mathematics.h" />
     <ClInclude Include="Platform.h" />
+    <ClInclude Include="PlatformWrapper.h" />
     <ClInclude Include="Quaternion.h" />
     <ClInclude Include="Rotation.h" />
     <ClInclude Include="RotationMatrix.h" />

@@ -10,7 +10,6 @@ public:
 	std::string delimeter;
 
 	std::vector<std::vector<std::string>> dataList; //Rows<columns<string data>>
-	int dataLines;
 
 	CSVReader(std::string fileName, std::string delimeter);
 	

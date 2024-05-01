@@ -79,7 +79,7 @@ namespace StewartPlatformGUI
 		System::Threading::Thread^ calculationThread;
 
 	private: System::Windows::Forms::Button^ buttonStart;
-	private: System::Windows::Forms::Button^ buttonStop;
+
 
 
 		   /// <summary>
@@ -101,7 +101,6 @@ namespace StewartPlatformGUI
 			   this->buttonClearFile = (gcnew System::Windows::Forms::Button());
 			   this->labelFilePath = (gcnew System::Windows::Forms::Label());
 			   this->buttonStart = (gcnew System::Windows::Forms::Button());
-			   this->buttonStop = (gcnew System::Windows::Forms::Button());
 			   this->labelFrequency = (gcnew System::Windows::Forms::Label());
 			   this->labelAmplitude = (gcnew System::Windows::Forms::Label());
 			   this->textBoxFrequency = (gcnew System::Windows::Forms::TextBox());
@@ -180,26 +179,13 @@ namespace StewartPlatformGUI
 			   this->buttonStart->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(128)), static_cast<System::Int32>(static_cast<System::Byte>(255)),
 				   static_cast<System::Int32>(static_cast<System::Byte>(128)));
 			   this->buttonStart->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 14, System::Drawing::FontStyle::Bold));
-			   this->buttonStart->Location = System::Drawing::Point(75, 500);
+			   this->buttonStart->Location = System::Drawing::Point(250, 500);
 			   this->buttonStart->Name = L"buttonStart";
 			   this->buttonStart->Size = System::Drawing::Size(200, 100);
 			   this->buttonStart->TabIndex = 4;
 			   this->buttonStart->Text = L"Start";
 			   this->buttonStart->UseVisualStyleBackColor = false;
 			   this->buttonStart->Click += gcnew System::EventHandler(this, &StewartPlatform::buttonStart_Click);
-			   // 
-			   // buttonStop
-			   // 
-			   this->buttonStop->BackColor = System::Drawing::Color::FromArgb(static_cast<System::Int32>(static_cast<System::Byte>(255)), static_cast<System::Int32>(static_cast<System::Byte>(128)),
-				   static_cast<System::Int32>(static_cast<System::Byte>(128)));
-			   this->buttonStop->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 14, System::Drawing::FontStyle::Bold));
-			   this->buttonStop->Location = System::Drawing::Point(425, 500);
-			   this->buttonStop->Name = L"buttonStop";
-			   this->buttonStop->Size = System::Drawing::Size(200, 100);
-			   this->buttonStop->TabIndex = 5;
-			   this->buttonStop->Text = L"Stop";
-			   this->buttonStop->UseVisualStyleBackColor = false;
-			   this->buttonStop->Click += gcnew System::EventHandler(this, &StewartPlatform::buttonStop_Click);
 			   // 
 			   // labelFrequency
 			   // 
@@ -312,7 +298,6 @@ namespace StewartPlatformGUI
 			   this->Controls->Add(this->textBoxFrequency);
 			   this->Controls->Add(this->labelAmplitude);
 			   this->Controls->Add(this->labelFrequency);
-			   this->Controls->Add(this->buttonStop);
 			   this->Controls->Add(this->buttonStart);
 			   this->Controls->Add(this->labelFilePath);
 			   this->Controls->Add(this->buttonClearFile);
@@ -360,16 +345,6 @@ namespace StewartPlatformGUI
 
 		labelFilePath->Text = "Select a File";
 	}
-
-	private: System::Void buttonStop_Click(System::Object^ sender, System::EventArgs^ e)
-	{
-		if (running) {
-			running = false;
-
-			MessageBox::Show("Terminated Operation", "Force Stop");
-		}
-	}
-
 
 	private: System::Void buttonStart_Click(System::Object^ sender, System::EventArgs^ e)
 	{

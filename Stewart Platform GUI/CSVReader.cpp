@@ -28,11 +28,6 @@ std::vector<std::vector<std::string>> CSVReader::Transcribe(std::string fileName
 
 	while (std::getline(file, line))
 	{
-		if (!StewartPlatformGUI::StewartPlatform::running) {
-			std::cout << "Cancelled Operation" << std::endl;
-			break;
-		}
-
 		std::vector<std::string> lineVector = this->SplitLine(line);
 
 		data.push_back(lineVector);

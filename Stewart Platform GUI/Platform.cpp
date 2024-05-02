@@ -4,8 +4,11 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <msclr/marshal_cppstd.h>
 
+using namespace System;
 using namespace System::IO::Ports;
+using namespace msclr::interop;
 
 Platform::Platform() 
 {

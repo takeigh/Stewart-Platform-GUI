@@ -14,8 +14,6 @@
 class Platform
 {
 public:
-	const std::string port = "COM3";
-
 	const double basePlateRadius = 546.1;//base center point to center of actuator mounting bracket
 	const double baseMountingAngle = 10.613;//arc angle between actuator mounting brackets from center of platform
 	const double platformPlateRadius = 636.1;//platform center point to center of actuator mounting bracket 546.1

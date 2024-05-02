@@ -15,7 +15,21 @@ std::vector<std::string> FrequencyCalculation::calculate(double f, double a, dou
 	this->duration = d;
 
 	double period = 1.0 / frequency;
-	double stepInterval = period / 2;
+	double stepInterval;
+	int steps;
+	if (frequency <= 5) {
+		steps = 32;
+	}
+	else if (frequency <= 20) {
+		steps = 16;
+	}
+	else {
+		steps = 8;
+	}
+
+	stepInterval = period / steps;
+
+	std::cout << stepInterval << std::endl;
 
 	std::vector<std::string> periodGroup;
 
@@ -24,56 +38,41 @@ std::vector<std::string> FrequencyCalculation::calculate(double f, double a, dou
 
 	// Center point for vertical oscillations
 	std::string centerString = std::to_string(centralLength);
-	std::string initialization = "G0 X" + centerString + " Y" + centerString + " Z" + centerString + " U" + centerString + " V" + centerString + " W" + centerString + " F100\n";
+	std::string initialization = "G0 X" + centerString + " Y" + centerString + " Z" + centerString + " U" + centerString + " V" + centerString + " W" + centerString + " F20\n";
 	std::cout << initialization << std::endl;
 
 	positionData.push_back(initialization);
-	
+
 	// Reset to 5 rather than 0 so drivers don't error out
-	std::string reset = "G0 X5 Y5 Z5 U5 V5 W5 F100\n";
+	std::string reset = "G0 X5 Y5 Z5 U5 V5 W5 F20\n";
 
-	// Find max and min of oscillation (10 * because feedrate is in mm not cm) (+ 200 to oscillate around 20cm)
-	double maxPosition = amplitude * sin(frequency * 2 * M_PI * (stepInterval/2)) + 200;
-	double minPosition = amplitude * sin(frequency * 2 * M_PI * 3 * (stepInterval/2)) + 200;
+	// Calculate positions and velocity for each step
+	double prevLength = centralLength;
+	for (int i = 0; i < steps; i++) {
+		double position = amplitude * sin(frequency * 2 * M_PI * i * stepInterval) + 200;
+		
+		// Calculate actuator lengths with EulerAngles
+		double actuatorLength = platform->GetLengths(position);
+		std::string length = std::to_string(actuatorLength);
 
-	// Acutator is slightly angled
-	// Calculate actuator length for desired height
-	double maxActuatorLength = platform->GetLengths(maxPosition);
-	std::string len = std::to_string(maxActuatorLength);
+		// Calculate velocity
+		double velocity = (actuatorLength - prevLength) / stepInterval;
+		// Only positive velocity
+		velocity = abs(velocity);
+		std::string velocityString = std::to_string(velocity);
 
-	// Make GCode with max lengths
-	std::string maxLine = "G0 X" + len + " Y" + len + " Z" + len + " U" + len + " V" + len + " W" + len;
+		// Make GCode
+		std::string line = "G0 X" + length + " Y" + length + " Z" + length + " U" + length + " V" + length + " W" + length + " F" + velocityString;
 
-	double minActuatorLength = platform->GetLengths(minPosition);
-	len = std::to_string(minActuatorLength);
+		// Add GCode to the periodGroup
+		periodGroup.push_back(line);
+	}
 
-	// GCode min lengths
-	std::string minLine = "G0 X" + len + " Y" + len + " Z" + len + " U" + len + " V" + len + " W" + len;
-	
-	// Feed rate is calculated as velocity
-	double velocity = (maxActuatorLength - minActuatorLength) * 2 / stepInterval;
-
-	// Read everything as positive whole values
-	double feedrate = std::abs(velocity);
-
-	// Attach feedrate to to GCode command with newline character
-	maxLine = maxLine + " F" + std::to_string(feedrate) + "\n";
-	std::cout << maxLine << std::endl;
-
-	minLine = minLine + " F" + std::to_string(feedrate) + "\n";
-	std::cout << minLine << std::endl;
-
-	// Add gcode to periodGroup
-	periodGroup.push_back(maxLine);
-	periodGroup.push_back(minLine);
-
+	// Add the required number of periods to the data
 	for (int i = 0; i < (duration * frequency); i++) {
 		positionData.insert(positionData.end(), periodGroup.begin(), periodGroup.end());
 	}
-	
-	std::string finalPosition = "G0 X" + centerString + " Y" + centerString + " Z" + centerString + " U" + centerString + " V" + centerString + " W" + centerString + " F" + std::to_string(feedrate) + "\n";
-	positionData.push_back(finalPosition);
-	
+
 	positionData.push_back(reset);
 
 	return positionData;
